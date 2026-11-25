@@ -47,16 +47,16 @@ default   [  33% ] 5 VUs  10.0s/30s
 running (0m11.0s), 5/5 VUs, 50 complete and 0 interrupted iterations
 default   [  37% ] 5 VUs  11.0s/30s
 
-running (0m12.0s), 5/5 VUs, 54 complete and 0 interrupted iterations
+running (0m12.0s), 5/5 VUs, 55 complete and 0 interrupted iterations
 default   [  40% ] 5 VUs  12.0s/30s
 
-running (0m13.0s), 5/5 VUs, 55 complete and 0 interrupted iterations
+running (0m13.0s), 5/5 VUs, 60 complete and 0 interrupted iterations
 default   [  43% ] 5 VUs  13.0s/30s
 
-running (0m14.0s), 5/5 VUs, 60 complete and 0 interrupted iterations
+running (0m14.0s), 5/5 VUs, 64 complete and 0 interrupted iterations
 default   [  47% ] 5 VUs  14.0s/30s
 
-running (0m15.0s), 5/5 VUs, 65 complete and 0 interrupted iterations
+running (0m15.0s), 5/5 VUs, 66 complete and 0 interrupted iterations
 default   [  50% ] 5 VUs  15.0s/30s
 
 running (0m16.0s), 5/5 VUs, 70 complete and 0 interrupted iterations
@@ -95,45 +95,42 @@ default   [  87% ] 5 VUs  26.0s/30s
 running (0m27.0s), 5/5 VUs, 125 complete and 0 interrupted iterations
 default   [  90% ] 5 VUs  27.0s/30s
 
-running (0m28.0s), 5/5 VUs, 129 complete and 0 interrupted iterations
+running (0m28.0s), 5/5 VUs, 130 complete and 0 interrupted iterations
 default   [  93% ] 5 VUs  28.0s/30s
 
 running (0m29.0s), 5/5 VUs, 134 complete and 0 interrupted iterations
 default   [  97% ] 5 VUs  29.0s/30s
 
-running (0m30.0s), 5/5 VUs, 138 complete and 0 interrupted iterations
+running (0m30.0s), 5/5 VUs, 139 complete and 0 interrupted iterations
 default   [ 100% ] 5 VUs  30.0s/30s
-
-running (0m31.0s), 3/5 VUs, 140 complete and 0 interrupted iterations
-default ↓ [ 100% ] 5 VUs  30s
 
 
   █ TOTAL RESULTS 
 
-    checks_total.......: 143     4.605469/s
-    checks_succeeded...: 100.00% 143 out of 143
-    checks_failed......: 0.00%   0 out of 143
+    checks_total.......: 144     4.652182/s
+    checks_succeeded...: 100.00% 144 out of 144
+    checks_failed......: 0.00%   0 out of 144
 
     ✓ HTTP статус 200 байна
 
     HTTP
-    http_req_duration..............: avg=32.14ms min=1.89ms med=55.54ms max=120.59ms p(90)=62.19ms p(95)=62.38ms
-      { expected_response:true }...: avg=32.14ms min=1.89ms med=55.54ms max=120.59ms p(90)=62.19ms p(95)=62.38ms
-    http_req_failed................: 0.00%  0 out of 286
-    http_reqs......................: 286    9.210939/s
+    http_req_duration..............: avg=30.43ms min=2.19ms med=29.67ms max=64.77ms p(90)=58.58ms p(95)=63.98ms
+      { expected_response:true }...: avg=30.43ms min=2.19ms med=29.67ms max=64.77ms p(90)=58.58ms p(95)=63.98ms
+    http_req_failed................: 0.00%  0 out of 288
+    http_reqs......................: 288    9.304364/s
 
     EXECUTION
-    iteration_duration.............: avg=1.07s   min=1.05s  med=1.05s   max=1.37s    p(90)=1.06s   p(95)=1.06s  
-    iterations.....................: 143    4.605469/s
-    vus............................: 3      min=3        max=5
+    iteration_duration.............: avg=1.06s   min=1.05s  med=1.06s   max=1.25s   p(90)=1.06s   p(95)=1.06s  
+    iterations.....................: 144    4.652182/s
+    vus............................: 5      min=5        max=5
     vus_max........................: 5      min=5        max=5
 
     NETWORK
-    data_received..................: 565 kB 18 kB/s
-    data_sent......................: 30 kB  977 B/s
+    data_received..................: 568 kB 18 kB/s
+    data_sent......................: 30 kB  983 B/s
 
 
 
 
-running (0m31.1s), 0/5 VUs, 143 complete and 0 interrupted iterations
+running (0m31.0s), 0/5 VUs, 144 complete and 0 interrupted iterations
 default ✓ [ 100% ] 5 VUs  30s

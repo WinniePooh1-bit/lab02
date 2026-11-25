@@ -107,21 +107,21 @@ default   [ 100% ] 5 VUs  30.0s/30s
 
   █ TOTAL RESULTS 
 
-    checks_total.......: 150     4.993615/s
+    checks_total.......: 150     4.992948/s
     checks_succeeded...: 100.00% 150 out of 150
     checks_failed......: 0.00%   0 out of 150
 
     ✓ локал сервер HTTP 200 буцаав
 
     HTTP
-    http_req_duration..............: avg=704.06µs min=135.57µs med=677.79µs max=2.44ms p(90)=972.21µs p(95)=1.13ms
-      { expected_response:true }...: avg=704.06µs min=135.57µs med=677.79µs max=2.44ms p(90)=972.21µs p(95)=1.13ms
+    http_req_duration..............: avg=751.05µs min=116.96µs med=691.03µs max=17.22ms p(90)=929.19µs p(95)=1.05ms
+      { expected_response:true }...: avg=751.05µs min=116.96µs med=691.03µs max=17.22ms p(90)=929.19µs p(95)=1.05ms
     http_req_failed................: 0.00% 0 out of 150
-    http_reqs......................: 150   4.993615/s
+    http_reqs......................: 150   4.992948/s
 
     EXECUTION
-    iteration_duration.............: avg=1s       min=1s       med=1s       max=1s     p(90)=1s       p(95)=1s    
-    iterations.....................: 150   4.993615/s
+    iteration_duration.............: avg=1s       min=1s       med=1s       max=1.01s   p(90)=1s       p(95)=1s    
+    iterations.....................: 150   4.992948/s
     vus............................: 5     min=5        max=5
     vus_max........................: 5     min=5        max=5
 
