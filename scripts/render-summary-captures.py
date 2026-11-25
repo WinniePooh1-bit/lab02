@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import re
 import textwrap
 from pathlib import Path
 
@@ -21,16 +20,24 @@ CAPTURES = {
     "run-threshold-fail.txt": "summary-threshold-fail.png",
 }
 
-SUMMARY_RE = re.compile(
-    r"^\\s*(?:checks_total|checks_succeeded|checks_failed|http_req_duration|"
-    r"http_req_failed|http_reqs|http_req_waiting|http_req_connecting|"
-    r"http_req_tls_handshaking|iteration_duration|iterations|vus_max|vus|"
-    r"data_received|data_sent)\\b"
+METRIC_NAMES = (
+    "checks_total",
+    "checks_succeeded",
+    "checks_failed",
+    "http_req_duration",
+    "http_req_failed",
+    "http_reqs",
+    "http_req_waiting",
+    "http_req_connecting",
+    "http_req_tls_handshaking",
+    "iteration_duration",
+    "iterations",
+    "vus_max",
+    "vus",
+    "data_received",
+    "data_sent",
 )
-HEADER_RE = re.compile(
-    r"^\\s*(?:█\\s*TOTAL RESULTS|HTTP$|EXECUTION$|NETWORK$|"
-    r"thresholds on metrics|time=|Тестийн үр дүн:|[✓✗]\\s*')"
-)
+HEADERS = {"█ TOTAL RESULTS", "HTTP", "EXECUTION", "NETWORK"}
 
 
 def load_font(size: int) -> ImageFont.ImageFont:
@@ -47,16 +54,22 @@ def load_font(size: int) -> ImageFont.ImageFont:
 
 
 def selected_lines(path: Path) -> list[str]:
-    raw = path.read_text(encoding="utf-8", errors="replace").splitlines()
-    selected = [
-        line.rstrip()
-        for line in raw
-        if SUMMARY_RE.search(line) or HEADER_RE.search(line)
-    ]
-    output: list[str] = []
-    for line in selected:
-        output.extend(textwrap.wrap(line, width=112, subsequent_indent="    ") or [""])
-    return output
+    selected: list[str] = []
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        stripped = line.lstrip()
+        if (
+            any(stripped.startswith(name) for name in METRIC_NAMES)
+            or stripped.strip() in HEADERS
+            or "thresholds on metrics" in stripped
+            or "Тестийн үр дүн:" in stripped
+            or stripped.startswith(("✓ '", "✗ '"))
+        ):
+            selected.extend(
+                textwrap.wrap(line.rstrip(), width=112, subsequent_indent="    ") or [""]
+            )
+    if not selected:
+        raise RuntimeError(f"k6 summary мөр олдсонгүй: {path}")
+    return selected
 
 
 def render(source: Path, destination: Path) -> None:
@@ -66,11 +79,16 @@ def render(source: Path, destination: Path) -> None:
     footer_font = load_font(14)
     line_height = 31
     width = 1600
-    height = 100 + max(1, len(lines)) * line_height + 38
+    height = 100 + len(lines) * line_height + 38
 
     image = Image.new("RGB", (width, height), "#101820")
     draw = ImageDraw.Draw(image)
-    draw.text((36, 24), f"k6 measured summary  |  {source.name}", font=title_font, fill="#f4f7fb")
+    draw.text(
+        (36, 24),
+        f"k6 measured summary  |  {source.name}",
+        font=title_font,
+        fill="#f4f7fb",
+    )
     draw.line((36, 70, width - 36, 70), fill="#567080", width=2)
 
     y = 91
@@ -85,8 +103,7 @@ def render(source: Path, destination: Path) -> None:
         fill="#9aaab5",
     )
 
-    # Reduce the PNG size without removing the metric text.
-    image = image.quantize(colors=64, method=Image.Quantize.FASTOCTREE)
+    image = image.quantize(colors=32, method=Image.Quantize.FASTOCTREE)
     destination.parent.mkdir(parents=True, exist_ok=True)
     image.save(destination, optimize=True)
 
@@ -94,7 +111,9 @@ def render(source: Path, destination: Path) -> None:
 def main() -> int:
     missing = [name for name in CAPTURES if not (RESULTS / name).is_file()]
     if missing:
-        raise SystemExit("PNG capture үүсгэхэд дараах k6 output дутуу байна: " + ", ".join(missing))
+        raise SystemExit(
+            "PNG capture үүсгэхэд дараах k6 output дутуу байна: " + ", ".join(missing)
+        )
 
     for source_name, image_name in CAPTURES.items():
         destination = OUTPUT / image_name
