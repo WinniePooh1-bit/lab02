@@ -1,0 +1,57 @@
+name: publish completed k6 measurements
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-k6-results.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out current main branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download the successful k6 measurement artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: lab02-k6-results
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 45556732426
+          path: ./downloaded
+
+      - name: Copy raw results and summary captures into the repository
+        run: |
+          set -euo pipefail
+          test -s downloaded/results/run-05vu.txt
+          test -s downloaded/results/run-30vu.txt
+          test -s downloaded/results/run-100vu.txt
+          test -s downloaded/results/run-threshold-pass.txt
+          test -s downloaded/results/run-threshold-fail.txt
+          cp -a downloaded/results/. results/
+          cp -a downloaded/screenshots/. screenshots/
+          python3 scripts/generate-report.py
+
+      - name: Commit and push measured outputs
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md results/ screenshots/
+          if ! git diff --cached --quiet; then
+            git commit -m "test: publish measured k6 results and screenshots"
+            git fetch origin main
+            git rebase origin/main
+            git push origin HEAD:main
+          else
+            echo "The measured outputs are already up to date."
+          fi
