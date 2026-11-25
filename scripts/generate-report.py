@@ -29,14 +29,16 @@ def parse_summary(filename: str) -> dict[str, str]:
 
     p90 = re.search(r"p\(90\)=([0-9.]+\s*[A-Za-zµμ]*)", duration_line)
     p95 = re.search(r"p\(95\)=([0-9.]+\s*[A-Za-zµμ]*)", duration_line)
+    maximum = re.search(r"max=([0-9.]+\s*[A-Za-zµμ]*)", duration_line)
     throughput = re.search(r"([0-9]+(?:\.[0-9]+)?)/s", requests_line)
     error_rate = re.search(r"([0-9]+(?:\.[0-9]+)?)%", failed_line)
-    if not all((p90, p95, throughput, error_rate)):
+    if not all((p90, p95, maximum, throughput, error_rate)):
         raise ValueError(f"{filename}: p90/p95/throughput/error rate-ийг бүрэн уншиж чадсангүй")
 
     return {
         "p90": p90.group(1).strip(),
         "p95": p95.group(1).strip(),
+        "maximum": maximum.group(1).strip(),
         "throughput": f"{throughput.group(1)}/s",
         "error_rate": f"{error_rate.group(1)}%",
     }
@@ -70,7 +72,7 @@ def main() -> int:
         f"100 VU үед p90 {rows['100']['p90']}, p95 {rows['100']['p95']}, throughput {rows['100']['throughput']}, error rate {rows['100']['error_rate']} байв.",
         f"5-аас 100 VU хүртэл өсгөхөд p95 latency {rows['05']['p95']}-ээс {rows['100']['p95']} болж өөрчлөгдсөн.",
         f"Энэ хугацаанд throughput {rows['05']['throughput']}-ээс {rows['100']['throughput']} болсон нь серверийн нийт хүсэлт боловсруулах хурдыг харуулж байна.",
-        f"100 VU үеийн error rate {rows['100']['error_rate']} байсан тул хүсэлтүүдийн алдааны түвшнийг мөн latency-тай хамт үнэлэх шаардлагатай.",
+        f"100 VU дээр p95 latency {rows['100']['p95']} болж бага өөрчлөгдсөн ч хамгийн их latency {rows['100']['maximum']} хүрсэн нь ачааллын оргил үед цөөн хүсэлт илт удааширсныг харуулж байна.",
         f"Локал /health endpoint-ийн 5 VU baseline p95 {local_baseline['p95']} байсан бөгөөд PASS тестийн босгыг энэ хэмжилтийн 1.5 дахин ихээр тогтоосон.",
         f"Threshold PASS туршилтын бүртгэгдсэн төлөв: {pass_result}.",
         f"100 ms орчим сааталтай /slow endpoint-д p95 < 50 ms босго тавьсан зориудын туршилтын төлөв: {fail_result}; энэ нь SLO quality gate FAIL-ийг илрүүлэх ёстойг харуулна.",
