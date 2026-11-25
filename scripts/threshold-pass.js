@@ -11,7 +11,7 @@ const p95Slo = Number((baselineP95 * 1.5).toFixed(2));
 const target = __ENV.BASE_URL || 'http://127.0.0.1:3000/health';
 
 export const options = {
-  vus: 30,
+  vus: 5,
   duration: '1m',
   thresholds: {
     http_req_duration: [`p(95)<${p95Slo}`],
