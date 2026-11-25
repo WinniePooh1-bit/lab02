@@ -1,0 +1,89 @@
+name: k6 lab measurements
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/k6-lab.yml'
+      - 'scripts/**'
+      - 'server/**'
+      - 'README.md'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install k6 and Python image dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo gpg -k
+          sudo gpg --no-default-keyring \
+            --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+            --keyserver hkp://keyserver.ubuntu.com:80 \
+            --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+            | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6 python3-pil curl nodejs
+          k6 version
+          node --version
+          python3 --version
+
+      - name: Run all lab measurements
+        run: bash scripts/run-lab.sh
+
+      - name: Verify output files
+        if: success()
+        run: |
+          set -euo pipefail
+          test -s results/k6-version.txt
+          test -s results/run-baseline.txt
+          test -s results/run-05vu.txt
+          test -s results/run-30vu.txt
+          test -s results/run-100vu.txt
+          test -s results/run-stages.txt
+          test -s results/run-local-baseline.txt
+          test -s results/run-threshold-pass.txt
+          test -s results/run-threshold-fail.txt
+          test -s results/report-summary.md
+          test -s screenshots/summary-05vu.png
+          test -s screenshots/summary-30vu.png
+          test -s screenshots/summary-100vu.png
+          test -s screenshots/summary-threshold-pass.png
+          test -s screenshots/summary-threshold-fail.png
+
+      - name: Save measured results to the repository
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md results/ screenshots/
+          if ! git diff --cached --quiet; then
+            git commit -m "test: save k6 measurements and summary captures"
+            git push origin HEAD:main
+          else
+            echo "No generated results were available to commit."
+          fi
+
+      - name: Upload raw outputs and captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lab02-k6-results
+          path: |
+            results/
+            screenshots/
+          if-no-files-found: warn
+          retention-days: 30
