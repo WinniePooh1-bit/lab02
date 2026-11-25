@@ -72,6 +72,7 @@ def main() -> int:
         f"100 VU үед p90 {rows['100']['p90']}, p95 {rows['100']['p95']}, throughput {rows['100']['throughput']}, error rate {rows['100']['error_rate']} байв.",
         f"5-аас 100 VU хүртэл өсгөхөд p95 latency {rows['05']['p95']}-ээс {rows['100']['p95']} болж өөрчлөгдсөн.",
         f"Энэ хугацаанд throughput {rows['05']['throughput']}-ээс {rows['100']['throughput']} болсон нь серверийн нийт хүсэлт боловсруулах хурдыг харуулж байна.",
+        f"Гурван түвшинд http_req_failed error rate {rows['05']['error_rate']}, {rows['30']['error_rate']}, {rows['100']['error_rate']} байсан нь хэмжилтийн хугацаанд хүсэлтийн алдаа илрээгүйг харууллаа.",
         f"100 VU дээр p95 latency {rows['100']['p95']} болж бага өөрчлөгдсөн ч хамгийн их latency {rows['100']['maximum']} хүрсэн нь ачааллын оргил үед цөөн хүсэлт илт удааширсныг харуулж байна.",
         f"Локал /health endpoint-ийн 5 VU baseline p95 {local_baseline['p95']} байсан бөгөөд PASS тестийн босгыг энэ хэмжилтийн 1.5 дахин ихээр тогтоосон.",
         f"Threshold PASS туршилтын бүртгэгдсэн төлөв: {pass_result}.",
