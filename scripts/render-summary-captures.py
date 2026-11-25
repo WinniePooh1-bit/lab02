@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Render selected lines from actual k6 output files as readable PNG captures."""
+"""Render selected lines from actual k6 summary output files as readable PNG captures."""
 
 from __future__ import annotations
 
+import re
 import textwrap
 from pathlib import Path
 
@@ -20,23 +21,15 @@ CAPTURES = {
     "run-threshold-fail.txt": "summary-threshold-fail.png",
 }
 
-KEYS = (
-    "execution:",
-    "data_received",
-    "data_sent",
-    "http_req_duration",
-    "http_req_failed",
-    "http_reqs",
-    "http_req_waiting",
-    "http_req_connecting",
-    "http_req_tls_handshaking",
-    "iterations",
-    "checks",
-    "vus",
-    "Тестийн үр дүн:",
-    "thresholds on metrics",
-    "ERRO[",
-    "WARN[",
+SUMMARY_RE = re.compile(
+    r"^\\s*(?:checks_total|checks_succeeded|checks_failed|http_req_duration|"
+    r"http_req_failed|http_reqs|http_req_waiting|http_req_connecting|"
+    r"http_req_tls_handshaking|iteration_duration|iterations|vus_max|vus|"
+    r"data_received|data_sent)\\b"
+)
+HEADER_RE = re.compile(
+    r"^\\s*(?:█\\s*TOTAL RESULTS|HTTP$|EXECUTION$|NETWORK$|"
+    r"thresholds on metrics|time=|Тестийн үр дүн:|[✓✗]\\s*')"
 )
 
 
@@ -55,44 +48,58 @@ def load_font(size: int) -> ImageFont.ImageFont:
 
 def selected_lines(path: Path) -> list[str]:
     raw = path.read_text(encoding="utf-8", errors="replace").splitlines()
-    selected = [line.rstrip() for line in raw if any(key in line for key in KEYS)]
-    if not selected:
-        selected = raw[-35:]
-    # Keep a concise capture while preserving the requested percentile and rate rows.
+    selected = [
+        line.rstrip()
+        for line in raw
+        if SUMMARY_RE.search(line) or HEADER_RE.search(line)
+    ]
     output: list[str] = []
     for line in selected:
-        output.extend(textwrap.wrap(line, width=100, subsequent_indent="    ") or [""])
-    return output[:45]
+        output.extend(textwrap.wrap(line, width=112, subsequent_indent="    ") or [""])
+    return output
 
 
 def render(source: Path, destination: Path) -> None:
     lines = selected_lines(source)
-    title = f"k6 result capture  |  {source.name}"
-    font = load_font(18)
     title_font = load_font(23)
-    line_height = 29
-    width = 1680
-    height = 88 + max(1, len(lines)) * line_height + 35
+    body_font = load_font(18)
+    footer_font = load_font(14)
+    line_height = 31
+    width = 1600
+    height = 100 + max(1, len(lines)) * line_height + 38
+
     image = Image.new("RGB", (width, height), "#101820")
     draw = ImageDraw.Draw(image)
-    draw.text((34, 22), title, font=title_font, fill="#f4f7fb")
-    draw.line((34, 62, width - 34, 62), fill="#567080", width=2)
-    y = 82
+    draw.text((36, 24), f"k6 measured summary  |  {source.name}", font=title_font, fill="#f4f7fb")
+    draw.line((36, 70, width - 36, 70), fill="#567080", width=2)
+
+    y = 91
     for line in lines:
-        draw.text((36, y), line, font=font, fill="#b9e6d3")
+        draw.text((38, y), line, font=body_font, fill="#b9e6d3")
         y += line_height
-    draw.text((36, height - 31), "Rendered from the matching raw k6 output file in results/.", font=load_font(14), fill="#9aaab5")
+
+    draw.text(
+        (38, height - 28),
+        "Extracted from the corresponding complete k6 text output.",
+        font=footer_font,
+        fill="#9aaab5",
+    )
+
+    # Reduce the PNG size without removing the metric text.
+    image = image.quantize(colors=64, method=Image.Quantize.FASTOCTREE)
     destination.parent.mkdir(parents=True, exist_ok=True)
-    image.save(destination)
+    image.save(destination, optimize=True)
 
 
 def main() -> int:
     missing = [name for name in CAPTURES if not (RESULTS / name).is_file()]
     if missing:
         raise SystemExit("PNG capture үүсгэхэд дараах k6 output дутуу байна: " + ", ".join(missing))
+
     for source_name, image_name in CAPTURES.items():
-        render(RESULTS / source_name, OUTPUT / image_name)
-        print(f"PNG capture үүслээ: screenshots/{image_name}")
+        destination = OUTPUT / image_name
+        render(RESULTS / source_name, destination)
+        print(f"PNG summary capture үүслээ: screenshots/{image_name}")
     return 0
 
 
