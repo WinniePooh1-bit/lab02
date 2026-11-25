@@ -78,4 +78,4 @@ echo "Тестийн үр дүн: FAIL (хүлээгдсэн, exit code $fail_st
 
 python3 scripts/generate-report.py
 python3 scripts/render-summary-captures.py
-echo "\nБүх хэмжилтийн текст results/ хавтсанд хадгалагдлаа. Screenshot-уудыг screenshots/ хавтсанд нэмнэ үү."
+echo "\nБүх бодит k6 хэмжилт results/ хавтсанд хадгалагдаж, PNG summary capture-ууд screenshots/ хавтсанд үүслээ."
