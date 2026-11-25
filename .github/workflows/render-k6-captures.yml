@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/render-k6-captures.yml'
+      - 'screenshots/README.md'
   workflow_dispatch:
 
 permissions:
